@@ -28,7 +28,7 @@ class CompleteClean(Command):
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-project = "navigation"
+project = "continuous"
 here = os.path.abspath(os.path.dirname(__file__))
 
 

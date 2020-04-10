@@ -1,4 +1,4 @@
-rm import random
+import random
 from collections import deque, namedtuple
 from typing import Tuple
 
@@ -8,8 +8,8 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
-from bananas.model import QNetwork
-from bananas.problem import Agent
+from continuous.model import QNetwork
+from continuous.problem import Agent
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

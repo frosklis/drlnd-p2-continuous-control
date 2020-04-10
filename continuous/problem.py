@@ -8,7 +8,7 @@ from typing import Tuple
 import mlflow
 import numpy as np
 
-from bananas import logger
+from continuous import logger
 from .environment import Environment
 
 
