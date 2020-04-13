@@ -3,7 +3,7 @@ from unityagents import UnityEnvironment
 from continuous import logger
 from continuous.agents import DDPG_Agent
 from continuous.environment import UnityAdapter
-import numpy as np
+from continuous.problem import moving_average, loggable, moving_average_cross
 
 if __name__ == '__main__':
     logger.info('Reacher environment')
@@ -16,7 +16,11 @@ if __name__ == '__main__':
         name="continuous_1")
     # state_size=33, action_size=4,
     agent = DDPG_Agent(env, seed=0,
-                       max_train_episodes=50)
+                       max_train_episodes=5,
+                       is_finished_function=[
+                           loggable(moving_average_cross, 100, 200),
+                           loggable(moving_average, 100, 30)],
+                       is_solved=loggable(moving_average, 100, 13), )
     scores = agent.train()
     env.close()
     logger.info(scores)
