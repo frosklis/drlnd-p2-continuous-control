@@ -146,7 +146,7 @@ class Agent:
                 'is_solved': solved,
             })
             # save final model
-            self.save(f'model_final.pkl')
+            self.save(f'./model_final.pkl')
         return self.is_trained
 
     def choose_action(self, state, epsilon=0):
