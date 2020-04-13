@@ -16,7 +16,7 @@ if __name__ == '__main__':
         name="continuous_1")
     # state_size=33, action_size=4,
     agent = DDPG_Agent(env, seed=0,
-                       max_train_episodes=2)
+                       max_train_episodes=50)
     scores = agent.train()
     env.close()
     logger.info(scores)

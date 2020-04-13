@@ -4,3 +4,5 @@ fix README
 x get environment Reacher
 x https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent
 x /Reacher.app.zip
+get it to log something locally
+then deploy to amazon and make it faster

@@ -6,18 +6,11 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+import mlflow
 
 from .. import logger
 from ..model import Actor, Critic
 from ..problem import Agent
-
-BUFFER_SIZE = int(1e5)  # replay buffer size
-BATCH_SIZE = 128  # minibatch size
-GAMMA = 0.99  # discount factor
-TAU = 1e-3  # for soft update of target parameters
-LR_ACTOR = 1e-4  # learning rate of the actor
-LR_CRITIC = 1e-3  # learning rate of the critic
-WEIGHT_DECAY = 0  # L2 weight decay
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -26,6 +19,14 @@ class DDPG_Agent(Agent):
     """Interacts with and learns from the environment."""
 
     def __init__(self, environment, description='DDPG Agent',
+
+                 buffer_size=int(1e5),  # replay buffer size
+                 batch_size=128,  # minibatch size
+                 gamma=0.99,  # discount factor
+                 tau=1e-3,  # for soft update of target parameters
+                 lr_actor=1e-4,  # learning rate of the actor
+                 lr_critic=1e-3,  # learning rate of the critic
+                 weight_decay=0,  # l2 weight decay
                  **kwargs):
         """Initialize an Agent object.
         
@@ -39,6 +40,13 @@ class DDPG_Agent(Agent):
         state_size = self.state_size
         action_size = self.action_size
         random_seed = self.seed
+        self.buffer_size = buffer_size
+        self.batch_size = batch_size
+        self.gamma = gamma
+        self.tau = tau
+        self.lr_actor = lr_actor
+        self.lr_critic = lr_critic
+        self.weight_decay = weight_decay
 
         # Actor Network (w/ Target Network)
         self.actor_local = Actor(state_size, action_size, random_seed).to(
@@ -46,7 +54,7 @@ class DDPG_Agent(Agent):
         self.actor_target = Actor(state_size, action_size, random_seed).to(
             device)
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(),
-                                          lr=LR_ACTOR)
+                                          lr=lr_actor)
 
         # Critic Network (w/ Target Network)
         self.critic_local = Critic(state_size, action_size, random_seed).to(
@@ -54,14 +62,14 @@ class DDPG_Agent(Agent):
         self.critic_target = Critic(state_size, action_size, random_seed).to(
             device)
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(),
-                                           lr=LR_CRITIC,
-                                           weight_decay=WEIGHT_DECAY)
+                                           lr=lr_critic,
+                                           weight_decay=weight_decay)
 
         # Noise process
         self.noise = OUNoise(action_size, random_seed)
 
         # Replay memory
-        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE,
+        self.memory = ReplayBuffer(action_size, buffer_size, batch_size,
                                    random_seed)
 
     def step(self, state, action, reward, next_state, done):
@@ -71,9 +79,9 @@ class DDPG_Agent(Agent):
         self.memory.add(state, action, reward, next_state, done)
 
         # Learn, if enough samples are available in memory
-        if len(self.memory) > BATCH_SIZE:
+        if len(self.memory) > self.batch_size:
             experiences = self.memory.sample()
-            self.learn(experiences, GAMMA)
+            self.learn(experiences, self.gamma)
 
     def act(self, state, add_noise=True):
         """Returns actions for given state as per current policy."""
@@ -149,8 +157,8 @@ class DDPG_Agent(Agent):
 
         # ----------------------- update target networks
         # ----------------------- #
-        self.soft_update(self.critic_local, self.critic_target, TAU)
-        self.soft_update(self.actor_local, self.actor_target, TAU)
+        self.soft_update(self.critic_local, self.critic_target, tau)
+        self.soft_update(self.actor_local, self.actor_target, tau)
 
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
@@ -171,6 +179,21 @@ class DDPG_Agent(Agent):
     def model_class(self):
         logger.warning('Not implemented. Moving on regardless.')
         return type(self.actor_local), type(self.critic_local)
+
+    def log_initial_setup(self):
+        super().log_initial_setup()
+        has_memory = self.buffer_size > 1
+        mlflow.log_param('memory', has_memory)
+
+        mlflow.log_params({
+            'buffer_size': self.buffer_size,
+            'batch_size': self.batch_size,
+            'gamma': self.gamma,
+            'tau': self.tau,
+            'lr_actor': self.lr_actor,
+            'lr_critic': self.lr_critic,
+            'weight_decay': self.weight_decay,
+        })
 
 
 class OUNoise:

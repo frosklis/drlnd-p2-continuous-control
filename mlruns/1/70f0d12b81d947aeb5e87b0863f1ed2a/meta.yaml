@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/claudio/Dropbox/udacity-drl/code/drlnd-p2-continuous-control/mlruns/1/70f0d12b81d947aeb5e87b0863f1ed2a/artifacts
+end_time: 1586514742763
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: deleted
+name: ''
+run_id: 70f0d12b81d947aeb5e87b0863f1ed2a
+run_uuid: 70f0d12b81d947aeb5e87b0863f1ed2a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1586514637228
+status: 4
+tags: []
+user_id: claudio
