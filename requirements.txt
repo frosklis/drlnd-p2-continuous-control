@@ -1,4 +1,4 @@
-unityagents
-numpy
 mlflow
 torch
+numpy
+unityagents
