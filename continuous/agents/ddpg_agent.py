@@ -2,11 +2,11 @@ import copy
 import random
 from collections import namedtuple, deque
 
+import mlflow
 import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-import mlflow
 
 from .. import logger
 from ..model import Actor, Critic
@@ -27,6 +27,7 @@ class DDPG_Agent(Agent):
                  lr_actor=1e-4,  # learning rate of the actor
                  lr_critic=1e-3,  # learning rate of the critic
                  weight_decay=0,  # l2 weight decay
+                 update_every=4,
                  **kwargs):
         """Initialize an Agent object.
         
@@ -47,6 +48,8 @@ class DDPG_Agent(Agent):
         self.lr_actor = lr_actor
         self.lr_critic = lr_critic
         self.weight_decay = weight_decay
+        self.t_step = 0
+        self.update_every = update_every
 
         # Actor Network (w/ Target Network)
         self.actor_local = Actor(state_size, action_size, random_seed).to(
@@ -78,11 +81,6 @@ class DDPG_Agent(Agent):
         # Save experience / reward
         self.memory.add(state, action, reward, next_state, done)
 
-        # Learn, if enough samples are available in memory
-        if len(self.memory) > self.batch_size:
-            experiences = self.memory.sample()
-            self.learn(experiences, self.gamma)
-
     def act(self, state, add_noise=True):
         """Returns actions for given state as per current policy."""
         state = torch.from_numpy(state).float().to(device)
@@ -99,6 +97,17 @@ class DDPG_Agent(Agent):
 
     def learn_from_step(self, state, action, reward, next_state, done):
         self.memory.add(state, action, reward, next_state, done)
+        # Learn every UPDATE_EVERY time steps.
+
+        self.t_step = (self.t_step + 1) % self.update_every
+        if self.t_step == 0:
+            # If enough samples are available in memory, get random subset
+            # and learn
+
+            # Learn, if enough samples are available in memory
+            if len(self.memory) > self.batch_size:
+                experiences = self.memory.sample()
+                self.learn(experiences, self.gamma)
 
     def _save(self, filename):
         states = {
@@ -129,7 +138,6 @@ class DDPG_Agent(Agent):
             gamma (float): discount factor
         """
         states, actions, rewards, next_states, dones = experiences
-
         # ---------------------------- update critic
         # ---------------------------- #
         # Get predicted next-state actions and Q values from target models
@@ -157,8 +165,8 @@ class DDPG_Agent(Agent):
 
         # ----------------------- update target networks
         # ----------------------- #
-        self.soft_update(self.critic_local, self.critic_target, tau)
-        self.soft_update(self.actor_local, self.actor_target, tau)
+        self.soft_update(self.critic_local, self.critic_target, self.tau)
+        self.soft_update(self.actor_local, self.actor_target, self.tau)
 
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
@@ -177,7 +185,8 @@ class DDPG_Agent(Agent):
 
     @property
     def model_class(self):
-        logger.warning('Not implemented. Moving on regardless.')
+        logger.warning(
+            'Model class method not implemented. Moving on regardless.')
         return type(self.actor_local), type(self.critic_local)
 
     def log_initial_setup(self):
@@ -193,6 +202,7 @@ class DDPG_Agent(Agent):
             'lr_actor': self.lr_actor,
             'lr_critic': self.lr_critic,
             'weight_decay': self.weight_decay,
+            'update_every': self.update_every,
         })
 
 

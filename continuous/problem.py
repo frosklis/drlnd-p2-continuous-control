@@ -46,7 +46,8 @@ def moving_average_cross(agent, samples_1: int, samples_2: int):
 
 
 class Agent:
-    """Definition of an agent tied to an environment. The agent can interact with the environment and learn"""
+    """Definition of an agent tied to an environment. The agent can interact
+    with the environment and learn"""
 
     def __init__(self,
                  environment: Environment,
@@ -77,7 +78,8 @@ class Agent:
     def __str__(self):
         return self.description
 
-    def play_episode(self, epsilon: float = 0, learn: bool = True, max_actions: int = None) -> Tuple[float, int, bool]:
+    def play_episode(self, epsilon: float = 0, learn: bool = True,
+                     max_actions: int = None) -> Tuple[float, int, bool]:
         total_reward = 0
         num_actions = 0
         while not self.environment.done:
@@ -100,7 +102,9 @@ class Agent:
             if max_actions is not None:
                 if num_actions >= max_actions:
                     logger.warning(
-                        'Episode interrupted because number of actions reached %d', max_actions)
+                        'Episode interrupted because number of actions '
+                        'reached %d',
+                        max_actions)
                     break
         return total_reward, num_actions, self.environment.done
 
@@ -114,7 +118,9 @@ class Agent:
             solved = False
             while not self.is_trained:
                 self.environment.reset(train_mode=True)
-                total_reward, num_actions, done = self.play_episode(learn=True, epsilon=self.epsilon)
+                total_reward, num_actions, done = self.play_episode(
+                    learn=True,
+                    epsilon=self.epsilon)
                 self.training_episodes += 1
                 self.episode_scores.append(total_reward)
                 mlflow.log_metrics({
@@ -126,13 +132,16 @@ class Agent:
                 if not solved:
                     if self.is_solved():
                         solved = True
-                        logger.info('Solved in %d episodes!!!', self.training_episodes)
-                        mlflow.log_metric('episodes_to_solve', self.training_episodes)
+                        logger.info('Solved in %d episodes!!!',
+                                    self.training_episodes)
+                        mlflow.log_metric('episodes_to_solve',
+                                          self.training_episodes)
                 if self.max_training_episodes is not None:
                     if self.max_training_episodes <= self.training_episodes:
                         break
                 if self.training_episodes % 100 == 0:
-                    self.save(f'model_checkpoint_{self.training_episodes:04d}.pkl')
+                    self.save(
+                        f'model_checkpoint_{self.training_episodes:04d}.pkl')
                 self._epsilon_update()
 
             logger.info('%s trained finished after %d episodes',
@@ -177,9 +186,10 @@ class Agent:
         params['agent'] = self.description
         params['max_training_episodes'] = self.max_training_episodes
         params['random_seed'] = self.seed
-        for param, function in [('is_trained_function', self._is_trained_functions),
-                                ('epsilon_update_function', self._epsilon_update),
-                                ('is_solved_function', self.is_solved)]:
+        for param, function in [
+            ('is_trained_function', self._is_trained_functions),
+            ('epsilon_update_function', self._epsilon_update),
+            ('is_solved_function', self.is_solved)]:
             try:
                 functions = list(function)
             except TypeError:
@@ -262,7 +272,8 @@ def load(filepath, environment):
 def choose_action(agent: Agent, state, epsilon: float = 0):
     """Greedily chooses the best action based on epsilon
 
-    with probability epsilon choose a random action, otherwise choose the best action
+    with probability epsilon choose a random action, otherwise choose the
+    best action
 
     Parameters
     ----------
@@ -271,7 +282,8 @@ def choose_action(agent: Agent, state, epsilon: float = 0):
     state : [type]
         [description]
     epsilon : float, optional
-        epsilon value, in the interval [0, 1], by default 0 (choose best action)
+        epsilon value, in the interval [0, 1], by default 0 (choose best
+        action)
 
     Returns
     -------
