@@ -2,4 +2,6 @@ mlflow
 torch
 numpy
 unityagents
+# Why? unity agents will get you protobuf=3.6.2 because it says so in its rquirements
+# but that breaks mlflow, which requires a newer version. That works nicely.
 protobuf==3.11.3
