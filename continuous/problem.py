@@ -123,6 +123,8 @@ class Agent:
                     epsilon=self.epsilon)
                 self.training_episodes += 1
                 self.episode_scores.append(total_reward)
+                logger.debug("Episode %5d: %f", self.training_episodes,
+                             total_reward)
                 mlflow.log_metrics({
                     'score': total_reward,
                     'num_actions': num_actions,
