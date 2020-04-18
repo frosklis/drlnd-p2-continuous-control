@@ -22,12 +22,13 @@ class DDPG_Agent(Agent):
 
                  buffer_size=int(1e5),  # replay buffer size
                  batch_size=128,  # minibatch size
-                 gamma=0.99,  # discount factor
+                 gamma=0.97,  # discount factor
                  tau=1e-3,  # for soft update of target parameters
                  lr_actor=1e-4,  # learning rate of the actor
-                 lr_critic=1e-3,  # learning rate of the critic
+                 lr_critic=1e-4,  # learning rate of the critic
                  weight_decay=0,  # l2 weight decay
-                 update_every=4,
+                 update_every=10,
+                 update_times=20,
                  **kwargs):
         """Initialize an Agent object.
         
@@ -50,6 +51,7 @@ class DDPG_Agent(Agent):
         self.weight_decay = weight_decay
         self.t_step = 0
         self.update_every = update_every
+        self.update_times = update_times
 
         # Actor Network (w/ Target Network)
         self.actor_local = Actor(state_size, action_size, random_seed).to(
@@ -106,8 +108,9 @@ class DDPG_Agent(Agent):
 
             # Learn, if enough samples are available in memory
             if len(self.memory) > self.batch_size:
-                experiences = self.memory.sample()
-                self.learn(experiences, self.gamma)
+                for _ in range(self.update_times):
+                    experiences = self.memory.sample()
+                    self.learn(experiences, self.gamma)
 
     def _save(self, filename):
         states = {
@@ -203,6 +206,7 @@ class DDPG_Agent(Agent):
             'lr_critic': self.lr_critic,
             'weight_decay': self.weight_decay,
             'update_every': self.update_every,
+            'update_times': self.update_times
         })
 
 
