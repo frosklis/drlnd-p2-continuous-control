@@ -26,7 +26,7 @@ class DDPG_Agent(Agent):
                  tau=1e-3,  # for soft update of target parameters
                  lr_actor=1e-4,  # learning rate of the actor
                  lr_critic=1e-4,  # learning rate of the critic
-                 weight_decay=0,  # l2 weight decay
+                 weight_decay=0.0,  # l2 weight decay
                  update_every=10,
                  update_times=20,
                  **kwargs):
