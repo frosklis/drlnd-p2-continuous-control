@@ -1,0 +1,4 @@
+artifact_location: file:../mlruns_aws/1
+experiment_id: '1'
+lifecycle_stage: active
+name: continuous_1
