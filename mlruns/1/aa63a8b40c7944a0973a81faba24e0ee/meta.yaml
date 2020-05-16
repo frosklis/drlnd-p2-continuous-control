@@ -2,7 +2,7 @@ artifact_uri: file:///Users/claudio/Dropbox/udacity-drl/code/drlnd-p2-continuous
 end_time: 1586771380931
 entry_point_name: ''
 experiment_id: '1'
-lifecycle_stage: active
+lifecycle_stage: deleted
 name: ''
 run_id: aa63a8b40c7944a0973a81faba24e0ee
 run_uuid: aa63a8b40c7944a0973a81faba24e0ee
