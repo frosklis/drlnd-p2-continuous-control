@@ -1,0 +1,15 @@
+artifact_uri: file:../mlruns_aws/1/2fba673e6c2e4a7f9cba7ea70d288532/artifacts
+end_time: 1589034241723
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+name: ''
+run_id: 2fba673e6c2e4a7f9cba7ea70d288532
+run_uuid: 2fba673e6c2e4a7f9cba7ea70d288532
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1589034228044
+status: 4
+tags: []
+user_id: claudio

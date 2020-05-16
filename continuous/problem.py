@@ -55,7 +55,6 @@ class Agent:
                  is_finished_function=loggable(moving_average_cross, 20, 100),
                  is_solved=loggable(lambda x: False),
                  epsilon_update=loggable(decay, 0.995, min_value=0.01),
-                 max_train_episodes=None,
                  seed: int = 0,
                  description='Generic Agent'):
         self.environment = environment
@@ -72,7 +71,6 @@ class Agent:
         self.episode_scores = []
         self.epsilon = epsilon_initial_value
         self.description = description
-        self.max_training_episodes = max_train_episodes
         self.seed = seed
 
     def __str__(self):
@@ -108,11 +106,15 @@ class Agent:
                     break
         return total_reward, num_actions, self.environment.done
 
-    def train(self):
+    def train(self, max_training_episodes=None):
         logger.info('Starting training for %s', str(self))
         mlflow.set_experiment(self.environment.name)
 
-        with mlflow.start_run(run_name=str(self)) as active_run:
+        # We can use this for interactive training and not losing coung of
+        # the steps
+        initial_training_episodes = self.training_episodes
+
+        with mlflow.start_run(run_name=str(self), nested=True) as active_run:
             run_id = active_run.info.run_id
             self.log_initial_setup()
             solved = False
@@ -138,8 +140,9 @@ class Agent:
                                     self.training_episodes)
                         mlflow.log_metric('episodes_to_solve',
                                           self.training_episodes)
-                if self.max_training_episodes is not None:
-                    if self.max_training_episodes <= self.training_episodes:
+                if max_training_episodes is not None:
+                    if max_training_episodes + initial_training_episodes <= \
+                            self.training_episodes:
                         break
                 if self.training_episodes % 100 == 0:
                     self.save(
@@ -186,7 +189,7 @@ class Agent:
             'agent class': type(self)
         })
         params['agent'] = self.description
-        params['max_training_episodes'] = self.max_training_episodes
+        # params['max_training_episodes'] = self.max_training_episodes
         params['random_seed'] = self.seed
         for param, function in [
             ('is_trained_function', self._is_trained_functions),

@@ -16,12 +16,12 @@ if __name__ == '__main__':
         name="continuous_1")
     # state_size=33, action_size=4,
     agent = DDPG_Agent(env, seed=0,
-                       max_train_episodes=5,
                        is_finished_function=[
                            loggable(moving_average_cross, 100, 200),
                            loggable(moving_average, 100, 30)],
                        is_solved=loggable(moving_average, 100, 13), )
-    scores = agent.train()
+    scores = agent.train(
+        max_training_episodes=5)
     env.close()
     logger.info(scores)
 
